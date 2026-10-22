@@ -11,6 +11,19 @@ Turns long videos into short vertical clips for TikTok, Reels and YouTube Shorts
 
 ## Running it
 
+### On Windows
+
+Double-click `start.bat`. The first time, it does the following:
+
+1. Installs Python and ffmpeg with winget, if they are missing.
+2. Installs the Python packages.
+3. Asks for your Anthropic API key, which you can skip.
+4. Opens http://localhost:8000.
+
+Later starts take a few seconds. Keep the window open while you use the app, and close it to stop. The key is stored in `data\api-key.txt`, where you can change or remove it.
+
+### On macOS or Linux
+
 You need Python 3.10+ and ffmpeg (with libass, which most builds include).
 
 ```bash
