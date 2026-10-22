@@ -1,0 +1,7 @@
+# Uploaded videos, rendered clips and the local database
+data/
+
+# Python
+.venv/
+__pycache__/
+*.pyc
