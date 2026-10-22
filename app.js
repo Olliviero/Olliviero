@@ -71,7 +71,9 @@ const serverApi = {
   },
 };
 
-const DEMO_KEY = "olliviero.demo.v2";
+const DEMO_KEY = "olliviero.demo.v3";
+const DEMO_MESSAGE =
+  "Dette er bare en forhåndsvisning med eksempler, så videoen ble ikke hentet. For å lage ekte klipp må serveren kjøre (se README), og du må åpne siden via den.";
 const DEMO_TITLES = [
   "Ingen snakker om dette",
   "Det største feilgrepet jeg gjorde",
@@ -127,51 +129,10 @@ function demoLoad() {
 }
 
 const demo = demoLoad();
-// Anything mid-processing when the page was closed is finished on load.
-demo.projects.forEach((p) => {
-  if (p.status !== "ready" && p.status !== "failed") {
-    Object.assign(p, { status: "ready", stage: "Ferdig", progress: 100, clips: demoClips(4) });
-  }
-});
-
 function demoSave() {
   try {
     localStorage.setItem(DEMO_KEY, JSON.stringify(demo));
   } catch (e) {}
-}
-
-function demoStart(project) {
-  const stages = [
-    [20, "downloading", "Henter video"],
-    [55, "transcribing", "Lager transkripsjon"],
-    [60, "analyzing", "Finner de beste øyeblikkene"],
-    [100, "rendering", "Lager klipp"],
-  ];
-  const tick = setInterval(() => {
-    if (!demo.projects.includes(project)) return clearInterval(tick);
-    project.progress = Math.min(100, project.progress + 4 + Math.round(Math.random() * 6));
-    const [, status, stage] = stages.find(([limit]) => project.progress <= limit) || stages[3];
-    Object.assign(project, { status, stage, updated: Date.now() });
-    if (project.progress >= 100) {
-      clearInterval(tick);
-      Object.assign(project, { status: "ready", stage: "Ferdig", clips: demoClips(3 + Math.floor(Math.random() * 4)) });
-      toast(`Klippene fra «${project.title}» er klare`);
-    }
-    demoSave();
-    refresh();
-  }, 500);
-}
-
-function demoCreate(spaceId, source, kind) {
-  const project = {
-    id: Math.random().toString(36).slice(2, 10), space_id: spaceId, source, kind, title: source,
-    status: "queued", stage: "I kø", progress: 0, error: null, duration: 900, picked_by: "demo",
-    clips: [], created: Date.now(), updated: Date.now(),
-  };
-  demo.projects.unshift(project);
-  demoSave();
-  demoStart(project);
-  return project;
 }
 
 const demoApi = {
@@ -204,12 +165,11 @@ const demoApi = {
   async listProjects(spaceId) {
     return demo.projects.filter((p) => p.space_id === spaceId);
   },
-  async createFromLink(spaceId, url) {
-    return demoCreate(spaceId, url, "url");
+  async createFromLink() {
+    throw new Error(DEMO_MESSAGE);
   },
-  async upload(spaceId, file, onProgress) {
-    onProgress(1);
-    return demoCreate(spaceId, file.name, "upload");
+  async upload() {
+    throw new Error(DEMO_MESSAGE);
   },
   async deleteProject(id) {
     demo.projects = demo.projects.filter((p) => p.id !== id);
@@ -304,7 +264,7 @@ function renderSidebar() {
 function renderNotice() {
   const notice = $("#notice");
   if (state.mode === "demo") {
-    notice.textContent = "Demomodus: klippene her er bare eksempler. Start serveren (se README) for å lage ekte klipp av videoene dine.";
+    notice.textContent = "Forhåndsvisning: klippene her er bare eksempler, og lenker du limer inn blir ikke hentet. Ekte klipp krever at serveren kjører (se README).";
   } else if (!state.ai) {
     notice.textContent = "Klippene velges nå uten AI. Sett ANTHROPIC_API_KEY på serveren for å la Claude finne de beste øyeblikkene, skrive titler og gi poengsum.";
   }
@@ -365,7 +325,7 @@ function renderClip(project, clip) {
   const tags = (clip.hashtags || []).map((h) => `#${h}`).join(" ");
   const media = clip.thumb
     ? `<img src="${escapeHtml(clip.thumb)}" alt="" loading="lazy">`
-    : `<div class="clip-placeholder" style="background:${gradient(project.title.length)}"></div>`;
+    : `<div class="clip-placeholder" style="background:${gradient(project.title.length)}"><span>Eksempel</span></div>`;
   const download = clip.video
     ? `<a class="btn btn-outline btn-sm" href="${escapeHtml(clip.video)}" download="${escapeHtml(clip.title)}.mp4">Last ned</a>`
     : `<button class="btn btn-outline btn-sm" disabled title="Ikke tilgjengelig i demomodus">Last ned</button>`;
@@ -516,6 +476,16 @@ $("#generateForm").addEventListener("submit", async (e) => {
   if (!link && !pendingFile) {
     toast("Lim inn en lenke eller last opp en fil først");
     $("#linkInput").focus();
+    return;
+  }
+
+  if (state.mode === "demo") {
+    const notice = $("#notice");
+    notice.textContent = DEMO_MESSAGE;
+    notice.hidden = false;
+    notice.classList.remove("flash");
+    void notice.offsetWidth;
+    notice.classList.add("flash");
     return;
   }
 

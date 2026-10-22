@@ -4,13 +4,15 @@ Run from the repository root:
     uvicorn app:app --app-dir server --port 8000
 """
 
+import base64
+import hmac
 import logging
 import os
 import shutil
 from urllib.parse import urlparse
 
 from fastapi import FastAPI, File, Form, HTTPException, UploadFile
-from fastapi.responses import FileResponse
+from fastapi.responses import FileResponse, Response
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel, Field
 
@@ -24,6 +26,7 @@ ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 DATA_DIR = os.environ.get("DATA_DIR", os.path.join(ROOT, "data"))
 MEDIA_DIR = os.path.join(DATA_DIR, "media")
 MAX_UPLOAD_MB = int(os.environ.get("MAX_UPLOAD_MB", 4096))
+APP_PASSWORD = os.environ.get("APP_PASSWORD", "")
 os.makedirs(MEDIA_DIR, exist_ok=True)
 
 store = Store(os.path.join(DATA_DIR, "db.json"))
@@ -33,6 +36,22 @@ for unfinished in store.unfinished_projects():
 
 app = FastAPI(title="Olliviero Spaces")
 app.mount("/media", StaticFiles(directory=MEDIA_DIR), name="media")
+
+
+@app.middleware("http")
+async def require_password(request, call_next):
+    """When APP_PASSWORD is set, ask for it (any username) on every request."""
+    if APP_PASSWORD:
+        supplied = ""
+        header = request.headers.get("authorization", "")
+        if header.startswith("Basic "):
+            try:
+                supplied = base64.b64decode(header[6:]).decode().partition(":")[2]
+            except ValueError:
+                pass
+        if not hmac.compare_digest(supplied.encode(), APP_PASSWORD.encode()):
+            return Response(status_code=401, headers={"WWW-Authenticate": 'Basic realm="Spaces"'})
+    return await call_next(request)
 
 
 class SpaceIn(BaseModel):

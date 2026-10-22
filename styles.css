@@ -264,6 +264,16 @@ a.btn { color: var(--text); text-decoration: none; }
   font-size: 13px;
 }
 
+.notice.flash { animation: flash .9s ease-out; }
+
+@keyframes flash {
+  0%, 40% { background: #fde68a; border-color: #f59e0b; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .notice.flash { animation: none; }
+}
+
 .hero h1 { margin: 0; font-size: 30px; font-weight: 600; letter-spacing: -0.02em; }
 .hero p { margin: 4px 0 20px; }
 
@@ -484,6 +494,16 @@ img.thumb-clip { object-fit: cover; height: 100%; }
 
 .clip-media[data-play] { cursor: pointer; }
 .clip-media img, .clip-media video, .clip-placeholder { display: block; width: 100%; height: 100%; object-fit: cover; }
+
+.clip-placeholder { display: grid; place-items: center; }
+.clip-placeholder span {
+  padding: 4px 10px;
+  border-radius: 99px;
+  background: rgba(255, 255, 255, .85);
+  color: var(--text);
+  font-size: 12px;
+  font-weight: 600;
+}
 
 .score, .duration {
   position: absolute;

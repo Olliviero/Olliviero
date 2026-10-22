@@ -24,7 +24,19 @@ uvicorn app:app --app-dir server --port 8000
 
 Open http://localhost:8000. The first transcription downloads the Whisper model, which takes a minute.
 
-If you open `index.html` directly, without the server, the page runs in demo mode with sample data.
+If you open `index.html` directly, without the server, the page only shows sample clips. It can't fetch or cut videos, because that work has to happen on the server.
+
+## Putting it online
+
+The `Dockerfile` builds an image with Python, ffmpeg and the app. Any host that runs Docker images works, for example Railway, Render or Fly.io:
+
+1. Create a new service from this GitHub repository. The host finds the `Dockerfile` by itself.
+2. Set the environment variables `ANTHROPIC_API_KEY` and `APP_PASSWORD`.
+3. Attach a volume at `/data` so your clips survive restarts and redeploys.
+
+Without `APP_PASSWORD`, anyone who finds the address can use the app, and your API key with it. When it is set, the browser asks for a username and password. The username can be anything; the password must match `APP_PASSWORD`.
+
+Choose a plan with at least 2 GB of memory. Whisper needs it to transcribe.
 
 ### Settings
 
@@ -40,6 +52,7 @@ All settings are environment variables:
 | `CAPTION_FONT` | `DejaVu Sans` | Font used for burned-in captions; must be installed on the server |
 | `DATA_DIR` | `./data` | Where videos, clips and the database are stored |
 | `MAX_UPLOAD_MB` | `4096` | Largest file that can be uploaded |
+| `APP_PASSWORD` | unset | Requires this password before anyone can use the app |
 | `KEEP_SOURCE` | unset | Set to `1` to keep the full source video after the clips are made |
 
 On a CPU, transcribing a long video takes a while. Choose a smaller `WHISPER_MODEL` for speed, or run on a GPU with `WHISPER_DEVICE=cuda`.
