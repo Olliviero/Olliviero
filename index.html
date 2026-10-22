@@ -13,7 +13,7 @@
 <body>
   <div class="app">
     <aside class="sidebar" id="sidebar">
-      <a class="logo" href="#">
+      <a class="logo" href="#" data-home>
         <span class="logo-mark" aria-hidden="true">
           <svg viewBox="0 0 24 24" width="18" height="18"><path d="M8 5.5v13l10.5-6.5z" fill="currentColor"/></svg>
         </span>
@@ -21,7 +21,7 @@
       </a>
 
       <nav class="nav">
-        <a class="nav-item active" href="#">
+        <a class="nav-item active" href="#" data-home>
           <svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg>
           Spaces
         </a>
@@ -49,12 +49,7 @@
       </div>
 
       <div class="sidebar-bottom">
-        <div class="upgrade">
-          <div class="upgrade-title">Gratisplan</div>
-          <div class="meter"><span style="width: 40%"></span></div>
-          <div class="upgrade-text">12 av 30 minutter brukt</div>
-          <button class="btn btn-primary btn-block">Oppgrader</button>
-        </div>
+        <div class="engine" id="engine"></div>
         <div class="user">
           <span class="avatar">O</span>
           <div class="user-info">
@@ -83,8 +78,12 @@
       </header>
 
       <section class="hero">
-        <h1>Spaces</h1>
-        <p class="muted">Samle videoene dine i spaces – én for hver kanal, kunde eller serie.</p>
+        <button class="back" id="backBtn" hidden>
+          <svg viewBox="0 0 24 24"><path d="m15 18-6-6 6-6"/></svg>
+          Spaces
+        </button>
+        <h1 id="pageTitle">Spaces</h1>
+        <p class="muted" id="pageLead">Samle videoene dine i spaces – én for hver kanal, kunde eller serie.</p>
 
         <form class="generate" id="generateForm">
           <div class="generate-input">
@@ -96,11 +95,12 @@
             </label>
           </div>
           <select id="targetSpace" class="select" aria-label="Velg space"></select>
-          <button class="btn btn-primary" type="submit">Generer klipp</button>
+          <button class="btn btn-primary" type="submit" id="generateBtn">Generer klipp</button>
         </form>
+        <p class="notice" id="notice" hidden></p>
       </section>
 
-      <section>
+      <section id="homeView">
         <div class="section-head">
           <div class="tabs" id="tabs">
             <button class="tab active" data-filter="all">Alle</button>
@@ -116,6 +116,17 @@
           </div>
           <h3>Ingen treff</h3>
           <p class="muted">Prøv et annet søk, eller lag et nytt space.</p>
+        </div>
+      </section>
+
+      <section id="spaceView" hidden>
+        <div id="projects"></div>
+        <div class="empty" id="spaceEmpty" hidden>
+          <div class="empty-icon">
+            <svg viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="m10 9 5 3-5 3z"/></svg>
+          </div>
+          <h3>Ingen videoer ennå</h3>
+          <p class="muted">Lim inn en lenke eller last opp en video over, så lager vi klipp av den.</p>
         </div>
       </section>
     </main>

@@ -1,0 +1,8 @@
+fastapi>=0.115
+uvicorn[standard]>=0.30
+python-multipart>=0.0.9
+yt-dlp>=2026.10.21
+faster-whisper>=1.2
+anthropic>=2.1
+# OpenCV 5 dropped the built-in face detector used for reframing.
+opencv-python-headless>=4.9,<5
